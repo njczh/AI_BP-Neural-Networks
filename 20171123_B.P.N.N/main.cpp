@@ -8,14 +8,15 @@
 #include "bp.h"
 using namespace std;
 
-vector<Data> my_data;
+#define RUN_TIMES 10
+#define TRAIN_TIMES 750
 
-void ReadTxt(string file)
+void ReadTxt(string file, vector<Data> &data)
 {
 	ifstream infile;
 	infile.open(file.data());			// 将文件流对象与文件连接起来
 	assert(infile.is_open());			// 若打开失败，则输出错误消息，并终止程序运行
-	my_data.clear();					// 将数据容器初始化
+	data.clear();						// 将数据容器初始化
 	string s;
 
 	while (getline(infile, s))
@@ -36,29 +37,52 @@ void ReadTxt(string file)
 				str_temp.clear();
 			}
 		}
-		my_data.push_back(temp);				// 将分割好的数据加入vector容器
+		data.push_back(temp);				// 将分割好的数据加入vector容器
 	}
 }
 
-
 int main()
 {
-	// 读训练数据
-	ReadTxt("Iris-train.txt");
+	vector<Data> train_data;
+	vector<Data> test_data;
+	ReadTxt("Iris-train.txt", train_data);
+	ReadTxt("Iris-test.txt", test_data);
 
-	// 要求独立运行10次，计算每一次的预测准确率，并计算平均准确率
-	for (int run_times = 0; run_times < 10; run_times++)
+	double sum = 0;
+	double result[RUN_TIMES];
+
+	// 独立运行10次，计算每一次的预测准确率，并计算平均准确率
+	printf("独立运行 %d 次，每次BP神经网络训练 %d 次。结果如下：\n", RUN_TIMES, TRAIN_TIMES);
+	for (int run_times = 0; run_times < RUN_TIMES; run_times++)
 	{
+		switch (run_times)
+		{
+		case 0:printf("This is %2dst times run, ", run_times + 1); break;
+		case 1:printf("This is %2drd times run, ", run_times + 1); break;
+		default:
+			printf("This is %2dth times run, ", run_times + 1); break;
+		}
+
 		Bp my_bp;
 
 		// BP神经网络训练
-		for (int i = 0; i < 1000; i++) my_bp.TrainGroup(my_data);
+		for (int i = 0; i < TRAIN_TIMES; i++)
+			my_bp.TrainGroup(train_data);
 
 		// 利用训练好的BP神经网络处理测试数据，并计算预测准确率
-		ReadTxt("Iris-test.txt");
-
-		my_bp.BpnnCalc(my_data);
+		result[run_times] = my_bp.BpnnCalc(test_data);
+		sum += result[run_times];
 	}
+
+	// 计算平均准确率及标准差；
+	double avg = sum / RUN_TIMES;
+	cout << "平均准确率为：" << avg << endl;
+
+	sum = 0;
+	for (int i = 0; i < RUN_TIMES; i++)
+		if (avg != result[i])sum += pow((avg - result[i]), 2);
+
+	cout << "标准差为：" << sqrt((sum / RUN_TIMES)) << endl;
 
 	system("pause");
 

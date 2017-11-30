@@ -10,7 +10,7 @@ using namespace std;
 #define OUT_NODE 3							// 输出层结点数
 // #define hidelayer 1						// 隐含层层数 先从一层开始
 #define HIDE_NODE 10						// 隐含层结点数
-#define learningRate 0.01					// 学习速率，alpha
+#define learningRate 0.02					// 学习速率，alpha
 
 
 /// ------ 输入层结点 ------
@@ -38,7 +38,7 @@ struct outputNode
 	double delta;							// 误差项δ
 };
 
-/// ------ 样本 ------
+/// ------ 单个样本 ------
 struct Data
 {
 	double in[IN_NODE];
@@ -47,7 +47,7 @@ struct Data
 
 class Bp
 {
-public:
+private:
 	inputNode input_layer[IN_NODE];			// 输入层仅一层
 	outputNode output_layer[OUT_NODE];		// 输出层仅一层
 	hiddenNode hidden_layer[HIDE_NODE];		// 隐含层先从一层开始
@@ -55,12 +55,11 @@ public:
 public:
 	Bp();
 	// ~Bp();
+	void TrainGroup(vector<Data>);			// 整组样本训练
+	double BpnnCalc(vector<Data>);			// 利用BP神经网络分类
+
+private:
 	void ForwardPropagationEpoc();			// 单个样本前向传播
 	void BackPropagationEpoc();				// 单个样本后向传播
 	void TrainSimple();						// 单个样本训练
-	void TrainGroup(vector<Data>);			// 整组样本训练
-	void BpnnCalc(vector<Data>);			// 利用BP神经网络分类
-
-private:
-
 };
